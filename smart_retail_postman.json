@@ -1,0 +1,173 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-1234-56789abcdef0",
+    "name": "Smart Retail API",
+    "description": "Colección completa de endpoints para Smart Retail - Sistema Agéntico de Gestión de Inventario",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Productos",
+      "description": "CRUD completo de productos",
+      "item": [
+        {
+          "name": "Obtener todos los productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "products"]
+            },
+            "description": "Retorna todos los productos con su categoría, precio y stock actual."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sku\": \"PRB-001\",\n    \"name\": \"Producto de Prueba\",\n    \"price\": 89990,\n    \"cost\": 40000,\n    \"current_stock\": 15,\n    \"category_id\": \"11111111-1111-1111-1111-111111111111\",\n    \"supplier_id\": \"33333333-3333-3333-3333-333333333333\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "products"]
+            },
+            "description": "Crea un nuevo producto en el inventario. Todos los campos son obligatorios."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar producto (parcial)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Producto Actualizado\",\n    \"price\": 95000,\n    \"current_stock\": 20,\n    \"min_safety_stock\": 5\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/products/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "55555555-5555-5555-5555-555555555555",
+                  "description": "UUID del producto a actualizar"
+                }
+              ]
+            },
+            "description": "Actualización parcial: solo envía los campos que deseas modificar. Campos permitidos: sku, name, category_id, supplier_id, price, cost, current_stock, min_safety_stock."
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/products/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "55555555-5555-5555-5555-555555555555",
+                  "description": "UUID del producto a eliminar"
+                }
+              ]
+            },
+            "description": "Elimina permanentemente un producto del inventario."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chat (IA Agéntica)",
+      "description": "Endpoints del asistente de IA con MCP",
+      "item": [
+        {
+          "name": "Obtener historial de conversación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/chat?conversationId=default",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "chat"],
+              "query": [
+                {
+                  "key": "conversationId",
+                  "value": "default",
+                  "description": "ID de la conversación a recuperar"
+                }
+              ]
+            },
+            "description": "Recupera el historial de mensajes persistidos de una conversación específica."
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar mensaje al asistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"conversationId\": \"default\",\n    \"messages\": [\n        {\n            \"role\": \"user\",\n            \"content\": \"¿Qué productos están en riesgo de agotarse?\"\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/chat",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "chat"]
+            },
+            "description": "Envía un mensaje al asistente de IA. La respuesta se recibe como Server-Sent Events (streaming). El asistente puede invocar herramientas MCP (get_current_stock, get_sales_velocity, create_ai_recommendation) antes de responder."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
