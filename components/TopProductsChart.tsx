@@ -58,7 +58,7 @@ export default function TopProductsChart({ data }: { data: TopProduct[] }) {
               }
             />
             <Tooltip
-              formatter={(value: number) => [value + " uds", "Vendidas"]}
+              formatter={(value) => [value + " uds", "Vendidas"]}
               contentStyle={{
                 borderRadius: "12px",
                 border: "1px solid #e4e4e7",

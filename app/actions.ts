@@ -84,48 +84,38 @@ export async function updateProduct(id: string, formData: FormData) {
 export async function deleteProduct(id: string) {
   const idResult = uuidSchema.safeParse(id);
   if (!idResult.success) {
-    return { success: false, error: "ID de producto inválido." };
+    return;
   }
 
   try {
     await query(`DELETE FROM products WHERE id = $1`, [id]);
     revalidatePath("/");
-    return { success: true };
   } catch (error) {
     console.error("Error eliminando producto:", error);
-    return { success: false, error: "Error interno al eliminar el producto." };
   }
 }
 
 export async function approveRecommendation(id: string) {
   const idResult = uuidSchema.safeParse(id);
-  if (!idResult.success) {
-    return { success: false, error: "ID inválido." };
-  }
+  if (!idResult.success) return;
 
   try {
     await query(`UPDATE ai_recommendations SET status = 'APPROVED' WHERE id = $1`, [id]);
     revalidatePath("/");
-    return { success: true };
   } catch (error) {
     console.error("Error aprobando recomendacion:", error);
-    return { success: false, error: "Error interno." };
   }
 }
 
 export async function rejectRecommendation(id: string) {
   const idResult = uuidSchema.safeParse(id);
-  if (!idResult.success) {
-    return { success: false, error: "ID inválido." };
-  }
+  if (!idResult.success) return;
 
   try {
     await query(`UPDATE ai_recommendations SET status = 'REJECTED' WHERE id = $1`, [id]);
     revalidatePath("/");
-    return { success: true };
   } catch (error) {
     console.error("Error rechazando recomendacion:", error);
-    return { success: false, error: "Error interno." };
   }
 }
 

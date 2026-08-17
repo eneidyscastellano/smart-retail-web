@@ -55,8 +55,8 @@ export default function MarginByCategory({ data }: { data: CategoryMargin[] }) {
               width={40}
             />
             <Tooltip
-              formatter={(value: number, _name: string, props: { payload: CategoryMargin }) => [
-                value.toFixed(1) + "% (" + props.payload.productCount + " productos)",
+              formatter={(value) => [
+                Number(value).toFixed(1) + "%",
                 "Margen",
               ]}
               contentStyle={{

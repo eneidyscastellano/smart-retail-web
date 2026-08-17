@@ -41,6 +41,6 @@ export const partialUpdateProductSchema = z.object({
 export const uuidSchema = z.string().uuid("ID inválido");
 
 // Helper para extraer el primer error legible de un ZodError
-export function formatZodError(error: z.ZodError): string {
-  return error.errors.map((e) => e.message).join(", ");
+export function formatZodError(error: z.ZodError<unknown>): string {
+  return error.issues.map((e: { message: string }) => e.message).join(", ");
 }
