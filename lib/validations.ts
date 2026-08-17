@@ -24,23 +24,25 @@ export const updateProductSchema = z.object({
 });
 
 // Esquema para actualización parcial vía API (todos opcionales)
-export const partialUpdateProductSchema = z.object({
-  sku: z.string().min(1).max(50).optional(),
-  name: z.string().min(1).max(200).optional(),
-  price: z.number().min(0).optional(),
-  cost: z.number().min(0).optional(),
-  current_stock: z.number().int().min(0).optional(),
-  min_safety_stock: z.number().int().min(0).optional(),
-  category_id: z.string().uuid().optional(),
-  supplier_id: z.string().uuid().optional(),
-}).refine((data) => Object.keys(data).length > 0, {
-  message: "Debe enviar al menos un campo para actualizar",
-});
+export const partialUpdateProductSchema = z
+  .object({
+    sku: z.string().min(1).max(50).optional(),
+    name: z.string().min(1).max(200).optional(),
+    price: z.number().min(0).optional(),
+    cost: z.number().min(0).optional(),
+    current_stock: z.number().int().min(0).optional(),
+    min_safety_stock: z.number().int().min(0).optional(),
+    category_id: z.string().uuid().optional(),
+    supplier_id: z.string().uuid().optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Debe enviar al menos un campo para actualizar",
+  });
 
 // Esquema para validar UUID en parámetros de ruta
 export const uuidSchema = z.string().uuid("ID inválido");
 
-// Helper para extraer el primer error legible de un ZodError
+// Helper para extraer errores legibles de un ZodError
 export function formatZodError(error: z.ZodError<unknown>): string {
-  return error.issues.map((e: { message: string }) => e.message).join(", ");
+  return error.issues.map((issue) => issue.message).join(", ");
 }

@@ -26,7 +26,9 @@ export default function MarginByCategory({ data }: { data: CategoryMargin[] }) {
         <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
           Margen por Categoría
         </h3>
-        <p className="text-[11px] text-zinc-500 mt-0.5">Porcentaje de ganancia promedio</p>
+        <p className="text-[11px] text-zinc-500 mt-0.5">
+          Porcentaje de ganancia promedio
+        </p>
       </div>
       {data.length === 0 ? (
         <p className="text-sm text-zinc-400 italic text-center py-8">
@@ -34,8 +36,15 @@ export default function MarginByCategory({ data }: { data: CategoryMargin[] }) {
         </p>
       ) : (
         <ResponsiveContainer width="100%" height={180}>
-          <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" vertical={false} />
+          <BarChart
+            data={data}
+            margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#f4f4f5"
+              vertical={false}
+            />
             <XAxis
               dataKey="category"
               tickLine={false}
@@ -43,7 +52,7 @@ export default function MarginByCategory({ data }: { data: CategoryMargin[] }) {
               fontSize={10}
               tick={{ fill: "#71717a" }}
               tickFormatter={(value: string) =>
-                value.length > 10 ? value.slice(0, 9) + "…" : value
+                value.length > 10 ? value.slice(0, 9) + "\u2026" : value
               }
             />
             <YAxis
@@ -55,7 +64,8 @@ export default function MarginByCategory({ data }: { data: CategoryMargin[] }) {
               width={40}
             />
             <Tooltip
-              formatter={(value) => [
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(value: any) => [
                 Number(value).toFixed(1) + "%",
                 "Margen",
               ]}

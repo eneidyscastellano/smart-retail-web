@@ -25,7 +25,9 @@ export default function TopProductsChart({ data }: { data: TopProduct[] }) {
         <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
           Top Productos
         </h3>
-        <p className="text-[11px] text-zinc-500 mt-0.5">Por unidades vendidas (7 días)</p>
+        <p className="text-[11px] text-zinc-500 mt-0.5">
+          Por unidades vendidas (7 días)
+        </p>
       </div>
       {data.length === 0 ? (
         <p className="text-sm text-zinc-400 italic text-center py-8">
@@ -54,11 +56,12 @@ export default function TopProductsChart({ data }: { data: TopProduct[] }) {
               fontSize={10}
               tick={{ fill: "#71717a" }}
               tickFormatter={(value: string) =>
-                value.length > 14 ? value.slice(0, 13) + "…" : value
+                value.length > 14 ? value.slice(0, 13) + "\u2026" : value
               }
             />
             <Tooltip
-              formatter={(value) => [value + " uds", "Vendidas"]}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(value: any) => [String(value) + " uds", "Vendidas"]}
               contentStyle={{
                 borderRadius: "12px",
                 border: "1px solid #e4e4e7",

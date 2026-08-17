@@ -25,7 +25,8 @@ export async function createProduct(formData: FormData) {
     return { success: false, error: formatZodError(result.error) };
   }
 
-  const { sku, name, price, cost, current_stock, category_id, supplier_id } = result.data;
+  const { sku, name, price, cost, current_stock, category_id, supplier_id } =
+    result.data;
 
   try {
     await query(
@@ -63,7 +64,16 @@ export async function updateProduct(id: string, formData: FormData) {
     return { success: false, error: formatZodError(result.error) };
   }
 
-  const { sku, name, price, cost, current_stock, min_safety_stock, category_id, supplier_id } = result.data;
+  const {
+    sku,
+    name,
+    price,
+    cost,
+    current_stock,
+    min_safety_stock,
+    category_id,
+    supplier_id,
+  } = result.data;
 
   try {
     await query(
@@ -71,21 +81,29 @@ export async function updateProduct(id: string, formData: FormData) {
        SET sku = $1, name = $2, price = $3, cost = $4, current_stock = $5,
            min_safety_stock = $6, category_id = $7, supplier_id = $8
        WHERE id = $9`,
-      [sku, name, price, cost, current_stock, min_safety_stock, category_id, supplier_id, id]
+      [
+        sku,
+        name,
+        price,
+        cost,
+        current_stock,
+        min_safety_stock,
+        category_id,
+        supplier_id,
+        id,
+      ]
     );
     revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Error actualizando producto:", error);
-    return { success: false, error: "Error interno al actualizar el producto." };
+    return { success: false, error: "Error interno al actualizar." };
   }
 }
 
-export async function deleteProduct(id: string) {
+export async function deleteProduct(id: string): Promise<void> {
   const idResult = uuidSchema.safeParse(id);
-  if (!idResult.success) {
-    return;
-  }
+  if (!idResult.success) return;
 
   try {
     await query(`DELETE FROM products WHERE id = $1`, [id]);
@@ -95,30 +113,36 @@ export async function deleteProduct(id: string) {
   }
 }
 
-export async function approveRecommendation(id: string) {
+export async function approveRecommendation(id: string): Promise<void> {
   const idResult = uuidSchema.safeParse(id);
   if (!idResult.success) return;
 
   try {
-    await query(`UPDATE ai_recommendations SET status = 'APPROVED' WHERE id = $1`, [id]);
+    await query(
+      `UPDATE ai_recommendations SET status = 'APPROVED' WHERE id = $1`,
+      [id]
+    );
     revalidatePath("/");
   } catch (error) {
     console.error("Error aprobando recomendacion:", error);
   }
 }
 
-export async function rejectRecommendation(id: string) {
+export async function rejectRecommendation(id: string): Promise<void> {
   const idResult = uuidSchema.safeParse(id);
   if (!idResult.success) return;
 
   try {
-    await query(`UPDATE ai_recommendations SET status = 'REJECTED' WHERE id = $1`, [id]);
+    await query(
+      `UPDATE ai_recommendations SET status = 'REJECTED' WHERE id = $1`,
+      [id]
+    );
     revalidatePath("/");
   } catch (error) {
     console.error("Error rechazando recomendacion:", error);
   }
 }
 
-export async function refreshData() {
+export async function refreshData(): Promise<void> {
   revalidatePath("/");
 }
