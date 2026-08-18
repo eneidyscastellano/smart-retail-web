@@ -103,7 +103,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return result.toTextStreamResponse();
+    return result.toUIMessageStreamResponse();
 
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
