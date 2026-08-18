@@ -1,5 +1,5 @@
 import { deepseek } from '@ai-sdk/deepseek';
-import { streamText, tool } from 'ai';
+import { streamText, dynamicTool } from 'ai';
 import { z } from 'zod';
 import {
   ensureChatSchema,
@@ -42,34 +42,40 @@ export async function POST(req: Request) {
     }
 
     const tools = {
-      get_current_stock: tool({
+      get_current_stock: dynamicTool({
         description: 'Obtiene los niveles actuales de inventario de todos los productos y tiempos de entrega del proveedor.',
-        parameters: z.object({}),
+        inputSchema: z.object({}),
         execute: async () => {
           return await getCurrentStock();
         },
       }),
 
-      get_sales_velocity: tool({
+      get_sales_velocity: dynamicTool({
         description: 'Calcula el promedio de ventas diarias de los productos en los últimos X días.',
-        parameters: z.object({
+        inputSchema: z.object({
           days: z.number().describe('Numero de dias hacia atras a analizar'),
         }),
-        execute: async (params: { days: number }) => {
-          return await getSalesVelocity(params.days);
+        execute: async (input) => {
+          const { days } = input as { days: number };
+          return await getSalesVelocity(days);
         },
       }),
 
-      create_ai_recommendation: tool({
+      create_ai_recommendation: dynamicTool({
         description: 'Crea una alerta de reabastecimiento en la base de datos.',
-        parameters: z.object({
+        inputSchema: z.object({
           product_id: z.string().describe('El UUID del producto'),
           recommended_order_qty: z.number().describe('Cantidad sugerida a comprar'),
           reason: z.string().describe('Explicacion de por que se necesita esta compra'),
         }),
-        execute: async (params: { product_id: string; recommended_order_qty: number; reason: string }) => {
+        execute: async (input) => {
+          const { product_id, recommended_order_qty, reason } = input as {
+            product_id: string;
+            recommended_order_qty: number;
+            reason: string;
+          };
           try {
-            return await createAiRecommendation(params.product_id, params.recommended_order_qty, params.reason);
+            return await createAiRecommendation(product_id, recommended_order_qty, reason);
           } catch (err: unknown) {
             return "Error: " + (err instanceof Error ? err.message : String(err));
           }
@@ -86,7 +92,6 @@ export async function POST(req: Request) {
         'Si un producto se agotará antes de que el proveedor entregue, usa create_ai_recommendation.',
       messages,
       tools,
-      maxToolRoundtrips: 5,
       onFinish: async ({ text }) => {
         try {
           if (text) {
