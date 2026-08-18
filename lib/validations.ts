@@ -7,8 +7,8 @@ export const createProductSchema = z.object({
   price: z.number().min(0, "El precio debe ser mayor o igual a 0"),
   cost: z.number().min(0, "El costo debe ser mayor o igual a 0"),
   current_stock: z.number().int().min(0, "El stock debe ser un entero positivo"),
-  category_id: z.string().uuid("ID de categoría inválido"),
-  supplier_id: z.string().uuid("ID de proveedor inválido"),
+  category_id: z.string().min(1, "Debe seleccionar una categoría"),
+  supplier_id: z.string().min(1, "Debe seleccionar un proveedor"),
 });
 
 // Esquema para actualizar un producto (todos los campos obligatorios desde el form)
@@ -19,8 +19,8 @@ export const updateProductSchema = z.object({
   cost: z.number().min(0, "El costo debe ser mayor o igual a 0"),
   current_stock: z.number().int().min(0, "El stock debe ser un entero positivo"),
   min_safety_stock: z.number().int().min(0, "El stock mínimo debe ser un entero positivo"),
-  category_id: z.string().uuid("ID de categoría inválido"),
-  supplier_id: z.string().uuid("ID de proveedor inválido"),
+  category_id: z.string().min(1, "Debe seleccionar una categoría"),
+  supplier_id: z.string().min(1, "Debe seleccionar un proveedor"),
 });
 
 // Esquema para actualización parcial vía API (todos opcionales)
@@ -32,8 +32,8 @@ export const partialUpdateProductSchema = z
     cost: z.number().min(0).optional(),
     current_stock: z.number().int().min(0).optional(),
     min_safety_stock: z.number().int().min(0).optional(),
-    category_id: z.string().uuid().optional(),
-    supplier_id: z.string().uuid().optional(),
+    category_id: z.string().min(1).optional(),
+   supplier_id: z.string().min(1).optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "Debe enviar al menos un campo para actualizar",
