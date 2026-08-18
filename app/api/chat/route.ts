@@ -1,5 +1,5 @@
 import { deepseek } from '@ai-sdk/deepseek';
-import { streamText, dynamicTool } from 'ai';
+import { streamText, dynamicTool, isStepCount } from 'ai';
 import { z } from 'zod';
 import {
   ensureChatSchema,
@@ -92,6 +92,7 @@ export async function POST(req: Request) {
         'Si un producto se agotará antes de que el proveedor entregue, usa create_ai_recommendation.',
       messages,
       tools,
+      stopWhen: isStepCount(5),
       onFinish: async ({ text }) => {
         try {
           if (text) {
