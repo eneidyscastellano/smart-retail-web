@@ -14,7 +14,6 @@ import {
 
 export const maxDuration = 60;
 
-// GET: recuperar historial de una conversación.
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const conversationId = url.searchParams.get('conversationId');
@@ -37,49 +36,41 @@ export async function POST(req: Request) {
     const { messages, conversationId = 'default' } = await req.json();
     await ensureChatSchema();
 
-    // Persistir mensaje del usuario
     const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === 'user');
     if (lastUserMsg) {
       await saveMessage(conversationId, 'user', String(lastUserMsg.content));
     }
 
-    // Herramientas disponibles para la IA (ejecución directa, sin MCP spawn)
     const tools = {
       get_current_stock: tool({
-        description:
-          'Obtiene los niveles actuales de inventario de todos los productos y tiempos de entrega del proveedor.',
+        description: 'Obtiene los niveles actuales de inventario de todos los productos y tiempos de entrega del proveedor.',
         parameters: z.object({}),
         execute: async () => {
-          const result = await getCurrentStock();
-          return result;
+          return await getCurrentStock();
         },
       }),
 
       get_sales_velocity: tool({
-        description:
-          'Calcula el promedio de ventas diarias de los productos en los últimos X días.',
+        description: 'Calcula el promedio de ventas diarias de los productos en los últimos X días.',
         parameters: z.object({
-          days: z.number().describe('Numero de dias hacia atras a analizar (ej. 7, 15, 30)'),
+          days: z.number().describe('Numero de dias hacia atras a analizar'),
         }),
-        execute: async ({ days }) => {
-          const result = await getSalesVelocity(days);
-          return result;
+        execute: async (params: { days: number }) => {
+          return await getSalesVelocity(params.days);
         },
       }),
 
       create_ai_recommendation: tool({
-        description:
-          'Crea una alerta de reabastecimiento en la base de datos cuando el stock se agotara antes de que el proveedor pueda entregar.',
+        description: 'Crea una alerta de reabastecimiento en la base de datos.',
         parameters: z.object({
           product_id: z.string().describe('El UUID del producto'),
           recommended_order_qty: z.number().describe('Cantidad sugerida a comprar'),
-          reason: z.string().describe('Explicacion logica de por que se necesita esta compra'),
+          reason: z.string().describe('Explicacion de por que se necesita esta compra'),
         }),
-        execute: async ({ product_id, recommended_order_qty, reason }) => {
+        execute: async (params: { product_id: string; recommended_order_qty: number; reason: string }) => {
           try {
-            const result = await createAiRecommendation(product_id, recommended_order_qty, reason);
-            return result;
-          } catch (err) {
+            return await createAiRecommendation(params.product_id, params.recommended_order_qty, params.reason);
+          } catch (err: unknown) {
             return "Error: " + (err instanceof Error ? err.message : String(err));
           }
         },
@@ -89,16 +80,13 @@ export async function POST(req: Request) {
     const result = streamText({
       model: deepseek('deepseek-chat'),
       system:
-        'Eres el Asistente de Inteligencia de Negocios de Smart Retail para gestionar inventario. Reglas obligatorias: ' +
-        '1) Consulta SIEMPRE las herramientas (get_current_stock, get_sales_velocity) con datos reales antes de responder; nunca inventes cifras. ' +
-        '2) Responde SIEMPRE de forma CONCISA y RESUMIDA: máximo 3-4 frases breves o una tabla corta con lo esencial (producto, stock, riesgo, acción). ' +
-        'Evita párrafos largos, cálculos extensos y textos de relleno. Ve directo a la conclusión y recomendación. ' +
-        '3) Si un producto se agotará antes de que el proveedor entregue, o está por debajo del mínimo de seguridad, usa create_ai_recommendation. ' +
-        '4) Si te preguntan algo que ya respondiste antes en la conversación, apóyate en el historial para responder de forma más precisa. ' +
-        'Usa lenguaje natural y claro.',
+        'Eres el Asistente de Inteligencia de Negocios de Smart Retail. ' +
+        'Consulta SIEMPRE las herramientas con datos reales antes de responder. ' +
+        'Responde de forma CONCISA: máximo 3-4 frases o una tabla corta. ' +
+        'Si un producto se agotará antes de que el proveedor entregue, usa create_ai_recommendation.',
       messages,
       tools,
-      maxSteps: 5,
+      maxToolRoundtrips: 5,
       onFinish: async ({ text }) => {
         try {
           if (text) {
@@ -110,7 +98,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
 
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
