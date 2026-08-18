@@ -20,9 +20,13 @@ export async function createProduct(formData: FormData) {
     supplier_id: (formData.get("supplier_id") as string)?.trim(),
   };
 
+  console.log("[createProduct] raw data:", JSON.stringify(raw));
+
   const result = createProductSchema.safeParse(raw);
   if (!result.success) {
-    return { success: false, error: formatZodError(result.error) };
+    const errorMsg = formatZodError(result.error);
+    console.error("[createProduct] validation failed:", errorMsg);
+    return { success: false, error: errorMsg };
   }
 
   const { sku, name, price, cost, current_stock, category_id, supplier_id } =
@@ -37,8 +41,9 @@ export async function createProduct(formData: FormData) {
     revalidatePath("/");
     return { success: true };
   } catch (error) {
-    console.error("Error creando producto:", error);
-    return { success: false, error: "Error interno al crear el producto." };
+    console.error("[createProduct] DB error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    return { success: false, error: "Error DB: " + msg };
   }
 }
 

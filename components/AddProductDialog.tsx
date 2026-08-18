@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,10 +33,19 @@ export default function AddProductDialog({
   suppliers: Supplier[];
 }) {
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
 
-  async function formAction(formData: FormData) {
-    await createProduct(formData);
-    setOpen(false);
+  function handleSubmit(formData: FormData) {
+    setError("");
+    startTransition(async () => {
+      const result = await createProduct(formData);
+      if (result && !result.success) {
+        setError(result.error || "Error desconocido");
+      } else {
+        setOpen(false);
+      }
+    });
   }
 
   return (
@@ -55,7 +64,13 @@ export default function AddProductDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form action={formAction} className="space-y-4 mt-2">
+        <form action={handleSubmit} className="space-y-4 mt-2">
+          {error && (
+            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           {/* SKU y Nombre */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
@@ -122,8 +137,8 @@ export default function AddProductDialog({
             </select>
           </div>
 
-          <Button type="submit" className="w-full">
-            Guardar Producto
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Guardando..." : "Guardar Producto"}
           </Button>
         </form>
       </DialogContent>
